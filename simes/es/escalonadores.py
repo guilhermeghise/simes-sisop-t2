@@ -54,7 +54,10 @@ class SSTF(Escalonador):
     nome = "SSTF"
 
     def escolher(self, fila, cabeca, direcao, agora, max_cilindro):
-        raise NotImplementedError("TODO (núcleo N2): implementar o SSTF")
+        indice = min(range(len(fila)), key=lambda i: abs(fila[i].cilindro - cabeca))
+        alvo = fila[indice].cilindro
+        nova_direcao = direcao if alvo == cabeca else (1 if alvo > cabeca else -1)
+        return indice, nova_direcao, []
 
 
 class SCAN(Escalonador):
