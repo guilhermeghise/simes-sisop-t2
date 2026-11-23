@@ -208,7 +208,22 @@ class SistemaArquivos:
         self._gravar_diretorio(pai)
 
     def open(self, processo, caminho, modo, handle):
-        raise NotImplementedError("TODO (núcleo N3): open")
+        if modo not in ("r", "w", "rw", "a"):
+            raise ErroSA("EINVAL", "modo inválido: %s" % modo)
+        if handle in self.tabelas_processo.get(processo, {}):
+            raise ErroSA("EEXIST", "handle já em uso: %s" % handle)
+
+        fcb = self.resolver(caminho)
+        if fcb.tipo == "diretorio":
+            raise ErroSA("EISDIR", caminho)
+        self._verificar_permissao(processo, fcb, modo)
+
+        posicao = fcb.tamanho if modo == "a" else 0
+        tabela = self.tabelas_processo.setdefault(processo, {})
+        tabela[handle] = EntradaProcesso(fcb.id, modo, posicao)
+        if fcb.id not in self.tabela_global:
+            self.tabela_global[fcb.id] = EntradaGlobal(fcb.id)
+        self.tabela_global[fcb.id].contador += 1
 
     def read(self, processo, handle, n):
         raise NotImplementedError("TODO (núcleo N3): read")
