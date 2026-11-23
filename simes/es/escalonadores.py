@@ -70,7 +70,14 @@ class SCAN(Escalonador):
     nome = "SCAN"
 
     def escolher(self, fila, cabeca, direcao, agora, max_cilindro):
-        raise NotImplementedError("TODO (núcleo N2): implementar o SCAN")
+        a_frente = (i for i, req in enumerate(fila) if (req.cilindro - cabeca) * direcao >= 0)
+        indice = min(a_frente, key=lambda i: abs(fila[i].cilindro - cabeca), default=None)
+        if indice is not None:
+            return indice, direcao, []
+
+        borda = max_cilindro if direcao == 1 else 0
+        indice = min(range(len(fila)), key=lambda i: abs(fila[i].cilindro - borda))
+        return indice, -direcao, [borda]
 
 
 # ------------------------------------------------------------------ módulo M2
