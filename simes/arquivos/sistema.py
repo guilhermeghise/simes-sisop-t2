@@ -162,13 +162,50 @@ class SistemaArquivos:
         Erros: ENOENT, ENOTDIR. Com o M4: segue links simbólicos (inclusive no meio do
         caminho; o último componente só se seguir_simbolico=True); ELOOP depois de
         MAX_LINKS_SIMBOLICOS links."""
-        raise NotImplementedError("TODO (núcleo N3): resolver")
+        fcb = self.raiz
+        for nome in self._dividir(caminho):
+            if fcb.tipo != "diretorio":
+                raise ErroSA("ENOTDIR", fcb.nome)
+            self._ler_diretorio(fcb)
+            fcb_id = fcb.entradas.get(nome)
+            if fcb_id is None:
+                raise ErroSA("ENOENT", caminho)
+            fcb = self.fcbs[fcb_id]
+        return fcb
 
     def mkdir(self, processo, caminho):
-        raise NotImplementedError("TODO (núcleo N3): mkdir")
+        self._criar_entrada(processo, caminho, "diretorio")
 
     def create(self, processo, caminho, tamanho):
-        raise NotImplementedError("TODO (núcleo N3): create")
+        if not isinstance(tamanho, int) or tamanho < 0:
+            raise ErroSA("EINVAL", "tamanho inválido")
+        self._criar_entrada(processo, caminho, "arquivo", tamanho)
+
+    def _criar_entrada(self, processo, caminho, tipo, tamanho=0):
+        partes = self._dividir(caminho)
+        if not partes:
+            raise ErroSA("EEXIST", caminho)
+        nome = partes[-1]
+        pai = self.resolver("/" + "/".join(partes[:-1]))
+        if pai.tipo != "diretorio":
+            raise ErroSA("ENOTDIR", pai.nome)
+        self._ler_diretorio(pai)
+        if nome in pai.entradas:
+            raise ErroSA("EEXIST", caminho)
+
+        n_blocos = 1 if tipo == "diretorio" else self._blocos_necessarios(tamanho)
+        fcb = self._novo_fcb(nome, tipo, pai.id, processo)
+        fcb.tamanho = tamanho
+        try:
+            extras = self.alocador.alocar(fcb, n_blocos)
+        except ErroSA:
+            del self.fcbs[fcb.id]
+            raise
+        self._aplicar(extras)
+        pai.entradas[nome] = fcb.id
+        if tipo == "diretorio":
+            self._gravar_diretorio(fcb)
+        self._gravar_diretorio(pai)
 
     def open(self, processo, caminho, modo, handle):
         raise NotImplementedError("TODO (núcleo N3): open")
