@@ -67,9 +67,9 @@ Resultado dos testes automáticos (`python3 executar.py testes`): [cole a últim
 
 ### X1 — Escalonadores sob quatro padrões de carga
 
-**Hipótese:** [escrita ANTES de rodar o experimento]
+**Hipótese:** Na carga aleatória, esperamos que o SSTF percorra menos cilindros e tenha uma resposta média menor que o FCFS. Também esperamos que o SCAN tenha uma espera máxima menor que o SSTF nessa carga.
 
-**Fundamentação:** [por que esperavam isso; citem as seções do Silberschatz]
+**Fundamentação:** O SSTF escolhe a requisição mais próxima da cabeça, o que tende a reduzir o custo de busca em relação à ordem de chegada do FCFS. Se pedidos próximos continuarem chegando, os mais distantes podem ficar esperando. O SCAN percorre o disco em uma direção antes de inverter, o que tende a reduzir esse problema (Silberschatz, 9ª ed., §10.4).
 
 **Configuração:** [o que o experimento varia e o que mede]
 
@@ -83,9 +83,9 @@ Resultado dos testes automáticos (`python3 executar.py testes`): [cole a últim
 
 ### X2 — Polling × interrupção conforme o dispositivo
 
-**Hipótese:** [ ]
+**Hipótese:** Nas cargas aleatória e sequencial, esperamos que a interrupção use uma fração menor de CPU que o polling no disco rígido. No dispositivo rápido, esperamos que a ordem se inverta e o polling use menos CPU.
 
-**Fundamentação:** [ ]
+**Fundamentação:** No polling, o modelo cobra CPU durante todo o atendimento. Por interrupção, cobra 0,017 ms por bloco pela interrupção e pela cópia. O disco rígido acrescenta busca e rotação ao tempo de transferência. Já o dispositivo rápido não tem esses dois custos e leva 0,008 ms por bloco, abaixo dos 0,017 ms cobrados por interrupção (Silberschatz, 9ª ed., §§13.2.1–13.2.2 e `simes/parametros.py`).
 
 **Configuração:** [ ]
 
