@@ -268,10 +268,40 @@ class SistemaArquivos:
         entrada.posicao = posicao
 
     def close(self, processo, handle):
-        raise NotImplementedError("TODO (núcleo N3): close")
+        entrada = self._entrada(processo, handle)
+        fcb = self.fcbs[entrada.fcb_id]
+        if fcb.sujo:
+            self._gravar_diretorio(self.fcbs[fcb.pai])
+            fcb.sujo = False
+        global_ = self.tabela_global[fcb.id]
+        if global_.trava == processo:
+            global_.trava = None
+        del self.tabelas_processo[processo][handle]
+        global_.contador -= 1
+        if global_.contador == 0:
+            del self.tabela_global[fcb.id]
+            if fcb.links == 0:
+                self._liberar_arquivo(fcb)
 
     def unlink(self, processo, caminho):
-        raise NotImplementedError("TODO (núcleo N3): unlink")
+        partes = self._dividir(caminho)
+        if not partes:
+            raise ErroSA("EISDIR", caminho)
+        pai = self.resolver("/" + "/".join(partes[:-1]))
+        if pai.tipo != "diretorio":
+            raise ErroSA("ENOTDIR", pai.nome)
+        self._ler_diretorio(pai)
+        nome = partes[-1]
+        if nome not in pai.entradas:
+            raise ErroSA("ENOENT", caminho)
+        fcb = self.fcbs[pai.entradas[nome]]
+        if fcb.tipo == "diretorio":
+            raise ErroSA("EISDIR", caminho)
+        del pai.entradas[nome]
+        fcb.links -= 1
+        self._gravar_diretorio(pai)
+        if fcb.links == 0 and fcb.id not in self.tabela_global:
+            self._liberar_arquivo(fcb)
 
     # ======================================================== TODO — módulo M4
     def link(self, processo, existente, novo):
