@@ -163,15 +163,30 @@ A média geral do banco (3,0062 ms) ficou ligeiramente abaixo da do compilador (
 
 **Fundamentação:** O modelo não tem cache de diretórios: resolver lê a raiz e cada diretório intermediário até localizar o arquivo. Cada diretório ocupa um bloco. Assim, acrescentar um componente de diretório acrescenta uma leitura, embora o tempo por leitura dependa da posição física e da continuidade no HDD (Silberschatz, 9ª ed., cap. 11; regras de simes/arquivos/sistema.py).
 
-**Configuração:** [ ]
+**Configuração:** Dez cadeias oficiais com profundidade de 1 a 10 diretórios abaixo da raiz, alocação contígua, HDD e sem cache. Em cada cadeia, um arquivo de 4.096 bytes é aberto, lido e fechado 20 vezes. A hipótese foi registrada em a7b6c26 antes de `python3 executar.py experimentos X1 X2 X3 X4`. As médias abaixo consideram apenas open, separando o custo de construção da árvore.
 
-**Resultados:** [ ]
+**Resultados:** As dez execuções terminaram sem erros; cada profundidade teve 20 opens.
 
-**Evidências:** [ ]
+| Diretórios abaixo da raiz | Leituras por open | Tempo médio por open (ms) |
+|---|---:|---:|
+| 1 | 2 | 4,2500 |
+| 2 | 3 | 4,2900 |
+| 3 | 4 | 4,3300 |
+| 4 | 5 | 4,3700 |
+| 5 | 6 | 4,4100 |
+| 6 | 7 | 4,4500 |
+| 7 | 8 | 4,4900 |
+| 8 | 9 | 4,5300 |
+| 9 | 10 | 4,5700 |
+| 10 | 11 | 4,6100 |
 
-**Análise:** [ ]
+**Evidências:** `resultados/arquivos_por_operacao.csv` (X4, open), `resultados/arquivos.csv` (X4), `resultados/experimentos.csv` e `graficos/X4_open_por_profundidade.png`, gerado por `python3 graficos.py`.
 
-**Veredito:** [ ]
+**Análise:** O número de leituras foi exatamente d + 1 em todas as profundidades: raiz mais d diretórios até o pai do arquivo. Open não grava e não transfere o conteúdo do arquivo; este é lido pela operação read seguinte. A construção com alocação contígua coloca os diretórios e o arquivo em blocos consecutivos, todos no mesmo cilindro neste experimento. Ao voltar ao bloco da raiz, o disco paga a latência rotacional, mas as leituras dos diretórios seguintes aproveitam a sequência. Por isso o tempo foi 4,17 + 0,04 × (d + 1) ms, de 4,25 a 4,61 ms, aumentando 0,04 ms por nível.
+
+A linearidade dos acessos decorre da regra de resolução de caminhos do modelo, conforme o cap. 11 do livro. A inclinação do tempo depende desta disposição física: não significa pagar uma busca e uma rotação completas a cada nível. Repetir o open não reduziu o custo porque o simulador não mantém cache de diretórios. Em sistemas reais, caches de nomes e metadados podem evitar leituras físicas em aberturas repetidas, como discutido na seção 4.
+
+**Veredito:** CONFIRMADA
 
 ### X5 — Tabelas de arquivos abertos com vários processos
 
