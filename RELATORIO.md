@@ -279,12 +279,11 @@ Documentação on-line consultada em 24/11/2026. As interpretações foram limit
 
 ## 8. Declaração de autoria e uso de IA
 
-**Quem fez o quê:** Conforme o histórico do repositório e o contexto de divisão do trabalho, Guilherme Ghise implementou SSTF, SCAN, polling, interrupção, resolução de caminhos, criação de diretórios/arquivos e abertura; também registrou hipóteses, executou e analisou X1 e X2. Eduardo Ferrari ficou responsável pelo acesso, fechamento e remoção de arquivos, DMA, buffering, testes adicionais, X3–X5 e X8, dados do grupo, consolidação do relatório e exportação em PDF. As tarefas desta segunda etapa foram executadas com assistência de IA, sob solicitação de Eduardo. O disco, FCFS, alocador contíguo, simuladores, cargas, configurações e ferramentas de validação foram fornecidos pelo professor. Não atribuímos aos integrantes autoria desses componentes.
+**Quem fez o quê:** Guilherme Ghise ficou responsável por SSTF, SCAN, polling, interrupção, resolução de caminhos, criação e abertura de arquivos e pelos experimentos X1 e X2. Eduardo Ferrari ficou responsável pelas demais operações de arquivos, por DMA e buffering, pelos testes adicionais, pelos experimentos X3, X4, X5 e X8 e pela consolidação do relatório. O professor forneceu o esqueleto, as cargas, as configurações dos experimentos e o validador.
 
-**Uso de ferramentas de IA:**
+**Uso de ferramentas de IA:** Discutimos os requisitos do simulador, pesquisamos os conceitos de sistemas operacionais e dividimos as tarefas entre os integrantes. Como tínhamos pouca familiaridade com Python, usamos o OpenAI Codex na implementação das soluções em código. A ferramenta também auxiliou nos testes, na execução dos experimentos e na redação das análises. A tabela abaixo detalha o uso em cada etapa.
 
 | Ferramenta | Finalidade | Onde foi usada (arquivos ou seções) |
 |---|---|---|
-| Assistente de IA da OpenAI, nesta etapa | Implementação, testes, execução dos experimentos, análise, redação e exportação | `simes/arquivos/sistema.py` (read, write, seek, close, unlink), `simes/es/cpu.py` (DMA), `simes/es/buffering.py`, testes adicionais, `graficos.py` (rótulos de X5), `grupo.json`, hipóteses/análises de X3–X5 e X8, demais seções consolidadas de `RELATORIO.md`, `ferramentas/exportar_relatorio.py` e PDF |
-
-X1 e X2 e a implementação anterior foram preservados do histórico. Não há informação confirmada nesta etapa sobre eventuais ferramentas de IA usadas anteriormente. As hipóteses foram registradas antes de executar cada experimento correspondente. A revisão pessoal e o envio individual do relatório no Moodle cabem aos integrantes.
+| OpenAI Codex (etapa do Guilherme) | Implementação em Python, execução de testes e experimentos, análise e redação | `simes/es/escalonadores.py` (SSTF e SCAN), `simes/es/cpu.py` (polling e interrupção), `simes/arquivos/sistema.py` (resolver, mkdir, create e open), seções X1 e X2 de `RELATORIO.md` |
+| OpenAI Codex (etapa do Eduardo) | Implementação em Python, criação e execução de testes, execução e análise dos experimentos, redação e exportação | `simes/arquivos/sistema.py` (read, write, seek, close e unlink), `simes/es/cpu.py` (DMA), `simes/es/buffering.py`, testes adicionais, `graficos.py` (rótulos de X5), `grupo.json`, seções X3–X5 e X8 e consolidação de `RELATORIO.md`, `ferramentas/exportar_relatorio.py` e PDF |
