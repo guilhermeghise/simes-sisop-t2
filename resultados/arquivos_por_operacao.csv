@@ -63,3 +63,8 @@ X4,profundidade_10,contigua,consultivo,create,1,0,12.0000,8.8200
 X4,profundidade_10,contigua,consultivo,mkdir,10,0,7.5000,8.6400
 X4,profundidade_10,contigua,consultivo,open,20,0,11.0000,4.6100
 X4,profundidade_10,contigua,consultivo,read,20,0,1.0000,0.0400
+X5,servidor_web,contigua,consultivo,close,960,0,0.0000,0.0000
+X5,servidor_web,contigua,consultivo,create,12,0,3.0000,8.4600
+X5,servidor_web,contigua,consultivo,mkdir,1,0,3.0000,8.4600
+X5,servidor_web,contigua,consultivo,open,960,0,2.0000,4.2730
+X5,servidor_web,contigua,consultivo,read,4346,0,3.6505,1.1832

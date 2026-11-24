@@ -194,15 +194,26 @@ A linearidade dos acessos decorre da regra de resolução de caminhos do modelo,
 
 **Fundamentação:** Cada trabalhador abre três páginas antes das leituras e fechamentos. As páginas vêm de um conjunto de 12 arquivos, permitindo compartilhar FCBs entre processos. A tabela global representa arquivos distintos e soma suas aberturas, enquanto cada abertura tem modo e posição na tabela do processo (Silberschatz, 9ª ed., cap. 11; simes/cargas_arquivos.py e simes/arquivos/estruturas.py).
 
-**Configuração:** [ ]
+**Configuração:** Carga oficial servidor_web, oito trabalhadores, 12 páginas, 40 rodadas e três aberturas por trabalhador em cada rodada. Todos os trabalhadores abrem antes da fase de leitura e só fecham depois dela. HDD, alocação contígua e sem cache. A hipótese foi registrada em 6b723b4 antes de `python3 executar.py experimentos X1 X2 X3 X4 X5`.
 
-**Resultados:** [ ]
+**Resultados:** A carga executou 6.279 operações sem erros, incluindo 960 opens, 4.346 reads e 960 closes.
 
-**Evidências:** [ ]
+| Indicador | Máximo observado |
+|---|---:|
+| Entradas na tabela global | 12 |
+| Handles de um processo | 3 |
+| Soma das tabelas dos processos | 24 |
+| Contador de aberturas de um arquivo | 6 |
 
-**Análise:** [ ]
+Foram 17.824 acessos, média de 2,8387 por operação e 1,4897 ms por operação. Cada open fez duas leituras de diretório, com 4,2730 ms de média; close não fez acessos porque a carga só lê os arquivos abertos.
 
-**Veredito:** [ ]
+**Evidências:** `resultados/arquivos.csv` (X5 e indicadores max_tabela_global, max_tabela_processo, max_soma_tabelas_processo e max_contador_aberturas), `resultados/arquivos_por_operacao.csv`, `resultados/experimentos.csv` e `graficos/X5_tabelas.png`, gerado por `python3 graficos.py`.
+
+**Análise:** A soma máxima de 24 handles resulta das três aberturas de cada um dos oito trabalhadores. A tabela global chegou a 12 entradas, uma por FCB distinto, e não a 24: várias aberturas compartilham o mesmo arquivo. O contador máximo de seis mostra um arquivo simultaneamente aberto por seis processos, sem exigir que os oito escolham a mesma página. O conjunto de páginas limita a tabela global a 12, e esta execução chegou a esse limite.
+
+Os quatro indicadores são máximos coletados ao longo da carga e não precisam ocorrer no mesmo instante. Não é correto somar o contador máximo de um arquivo como se fosse o contador de todos os 12. O contador representa referências abertas, e não quantidade de leituras; cada close retira uma referência e a entrada global sai quando sua contagem chega a zero. As posições permanecem nos handles de cada processo, permitindo leituras independentes. A separação ilustra as tabelas global e por processo discutidas no cap. 11 do livro. O experimento mede tamanhos de tabelas, não bytes de memória do kernel nem concorrência de execução real.
+
+**Veredito:** CONFIRMADA
 
 ### X6 — Cache de blocos (M1)
 
