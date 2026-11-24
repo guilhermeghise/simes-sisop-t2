@@ -1,6 +1,6 @@
 # Relatório — SimES: simulador de E/S e de sistema de arquivos
 
-**Integrantes:** Eduardo Ferrari, Guilherme Ghise Rossoni
+**Integrantes:** Eduardo Ramos Ferrari, Guilherme Ghise Rossoni
 
 **Repositório:** https://github.com/guilhermeghise/simes-sisop-t2
 
@@ -279,7 +279,7 @@ Documentação on-line consultada em 24/11/2026. As interpretações foram limit
 
 ## 8. Declaração de autoria e uso de IA
 
-**Quem fez o quê:** Guilherme Ghise Rossoni ficou responsável por SSTF, SCAN, polling, interrupção, resolução de caminhos, criação e abertura de arquivos e pelos experimentos X1 e X2. Eduardo Ferrari ficou responsável pelas demais operações de arquivos, por DMA e buffering, pelos testes adicionais, pelos experimentos X3, X4, X5 e X8 e pela consolidação do relatório. O professor forneceu o esqueleto, as cargas, as configurações dos experimentos e o validador.
+**Quem fez o quê:** Guilherme Ghise Rossoni ficou responsável por SSTF, SCAN, polling, interrupção, resolução de caminhos, criação e abertura de arquivos e pelos experimentos X1 e X2. Eduardo Ramos Ferrari ficou responsável pelas demais operações de arquivos, por DMA e buffering, pelos testes adicionais, pelos experimentos X3, X4, X5 e X8 e pela consolidação do relatório. O professor forneceu o esqueleto, as cargas, as configurações dos experimentos e o validador.
 
 **Uso de ferramentas de IA:** Nós discutimos os requisitos do simulador, pesquisamos os conceitos de sistemas operacionais e definimos a divisão das tarefas. Usamos o OpenAI Codex em etapas do desenvolvimento. Na implementação, a ferramenta ajudou a traduzir as regras do simulador em código Python, linguagem com a qual tínhamos pouca familiaridade. Também recorremos a ela nos testes, na execução dos experimentos e na redação das análises. A tabela detalha os usos na parte de cada integrante.
 

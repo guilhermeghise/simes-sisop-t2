@@ -64,7 +64,7 @@ def exportar(raiz):
                             leftMargin=1.6*cm, rightMargin=1.6*cm,
                             topMargin=1.8*cm, bottomMargin=1.7*cm,
                             title="SimES - Relatório final",
-                            author="Eduardo Ferrari e Guilherme Ghise Rossoni")
+                            author="Eduardo Ramos Ferrari e Guilherme Ghise Rossoni")
     conteudo = []
     linhas = (raiz / "RELATORIO.md").read_text(encoding="utf-8").splitlines()
     i = 0
