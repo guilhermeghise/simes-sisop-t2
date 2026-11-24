@@ -26,4 +26,25 @@ Comparem n_buffers = 1 (buffer simples), 2 (duplo) e 3 (circular).
 
 def simular_buffering(n_buffers, producao_ms, consumo_ms, blocos):
     """Devolve dict com tempo_total_ms, bloqueio_produtor_ms e utilizacao_dispositivo_pct."""
-    raise NotImplementedError("TODO (M3): simular o buffering")
+    if not isinstance(n_buffers, int) or n_buffers < 1:
+        raise ValueError("n_buffers deve ser um inteiro positivo")
+    if not isinstance(blocos, int) or blocos < 0:
+        raise ValueError("blocos deve ser um inteiro não negativo")
+    if producao_ms < 0 or consumo_ms < 0:
+        raise ValueError("tempos não podem ser negativos")
+
+    livres_em = [0.0] * min(n_buffers, blocos)
+    produtor = dispositivo = bloqueio = 0.0
+    for k in range(blocos):
+        buffer = k % n_buffers
+        inicio = max(produtor, livres_em[buffer])
+        bloqueio += inicio - produtor
+        produtor = inicio + producao_ms
+        dispositivo = max(dispositivo, produtor) + consumo_ms
+        livres_em[buffer] = dispositivo
+    return {
+        "tempo_total_ms": dispositivo,
+        "bloqueio_produtor_ms": bloqueio,
+        "utilizacao_dispositivo_pct": (
+            100.0 * blocos * consumo_ms / dispositivo if dispositivo else 0.0),
+    }
