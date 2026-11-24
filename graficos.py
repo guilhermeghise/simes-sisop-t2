@@ -130,8 +130,9 @@ def main():
     if x5:
         r = x5[0]
         cols = ["max_tabela_global", "max_tabela_processo", "max_soma_tabelas_processo", "max_contador_aberturas"]
-        barras(plt, "X5_tabelas.png", "X5 — tabelas de arquivos abertos", cols, ["servidor_web"],
-               {(c, "servidor_web"): num(r[c]) for c in cols}, "entradas")
+        rotulos = ["Tabela global", "Por processo", "Soma dos processos", "Contador de aberturas"]
+        barras(plt, "X5_tabelas.png", "X5 — tabelas de arquivos abertos", rotulos, ["servidor_web"],
+               {(rotulo, "servidor_web"): num(r[c]) for c, rotulo in zip(cols, rotulos)}, "entradas")
         feitos.append("X5")
 
     x6 = [r for r in es if r["experimento"] == "X6" and r["cache"] != "nenhuma"]
