@@ -226,13 +226,46 @@ class SistemaArquivos:
         self.tabela_global[fcb.id].contador += 1
 
     def read(self, processo, handle, n):
-        raise NotImplementedError("TODO (núcleo N3): read")
+        entrada = self._entrada(processo, handle)
+        if "r" not in entrada.modo:
+            raise ErroSA("EBADF", "handle sem permissão de leitura")
+        if not isinstance(n, int) or n < 0:
+            raise ErroSA("EINVAL", "quantidade de bytes inválida")
+        fcb = self.fcbs[entrada.fcb_id]
+        self._verificar_trava(processo, fcb)
+        lidos = min(n, max(0, fcb.tamanho - entrada.posicao))
+        fim = entrada.posicao + lidos
+        self._ler(self._blocos_do_intervalo(fcb, entrada.posicao, fim))
+        entrada.posicao = fim
+        return lidos
 
     def write(self, processo, handle, n):
-        raise NotImplementedError("TODO (núcleo N3): write")
+        entrada = self._entrada(processo, handle)
+        if entrada.modo not in ("w", "rw", "a"):
+            raise ErroSA("EBADF", "handle sem permissão de escrita")
+        if not isinstance(n, int) or n < 0:
+            raise ErroSA("EINVAL", "quantidade de bytes inválida")
+        fcb = self.fcbs[entrada.fcb_id]
+        self._verificar_trava(processo, fcb)
+        if n == 0:
+            return 0
+        inicio = fcb.tamanho if entrada.modo == "a" else entrada.posicao
+        fim = inicio + n
+        adicionais = self._blocos_necessarios(fim) - len(fcb.blocos)
+        if adicionais > 0:
+            self._aplicar(self.alocador.estender(fcb, adicionais))
+        self._escrever(self._blocos_do_intervalo(fcb, inicio, fim))
+        entrada.posicao = fim
+        fcb.tamanho = max(fcb.tamanho, fim)
+        fcb.modificado_ms = self.agora_ms
+        fcb.sujo = True
+        return n
 
     def seek(self, processo, handle, posicao):
-        raise NotImplementedError("TODO (núcleo N3): seek")
+        entrada = self._entrada(processo, handle)
+        if not isinstance(posicao, int) or posicao < 0:
+            raise ErroSA("EINVAL", "posição inválida")
+        entrada.posicao = posicao
 
     def close(self, processo, handle):
         raise NotImplementedError("TODO (núcleo N3): close")
