@@ -1,10 +1,17 @@
 {
   "integrantes": [
-    {"nome": "Nome Completo do Integrante 1"}
+    {
+      "nome": "Eduardo Ferrari"
+    },
+    {
+      "nome": "Guilherme Ghise"
+    }
   ],
-  "repositorio": "https://github.com/usuario/nome-do-repositorio",
-  "modulos": [],
+  "repositorio": "https://github.com/guilhermeghise/simes-sisop-t2",
+  "modulos": [
+    "M3"
+  ],
   "integracao": false,
   "bonus_flash": false,
-  "observacoes": ""
+  "observacoes": "Núcleo N1–N4 e M3; experimentos X1–X5 e X8."
 }
