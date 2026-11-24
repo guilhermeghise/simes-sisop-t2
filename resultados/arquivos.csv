@@ -1,1 +1,3 @@
 experimento,carga,alocador,bloqueio,operacoes,erros,acessos_total,acessos_por_op,tempo_total_ms,tempo_medio_op_ms,max_tabela_global,max_tabela_processo,max_soma_tabelas_processo,max_contador_aberturas,extras
+X3,compilador,contigua,consultivo,3904,0,5400,1.3832,11986.6500,3.0704,1,1,1,1,blocos_livres=319343;descontinuidades_medias=0.0;falhas_alocacao=0;maior_segmento_livre=319343;realocacoes=0;segmentos_livres=1
+X3,banco_dados,contigua,consultivo,6602,0,3610,0.5468,19846.9600,3.0062,2,2,2,1,blocos_livres=303539;descontinuidades_medias=0.0;falhas_alocacao=0;maior_segmento_livre=303539;realocacoes=0;segmentos_livres=1

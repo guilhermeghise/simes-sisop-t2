@@ -1,1 +1,15 @@
 experimento,carga,alocador,bloqueio,operacao,n,erros,acessos_medios,tempo_medio_ms
+X3,compilador,contigua,consultivo,close,600,0,0.2000,1.0468
+X3,compilador,contigua,consultivo,create,175,0,4.0000,11.9495
+X3,compilador,contigua,consultivo,mkdir,4,0,3.7500,10.5750
+X3,compilador,contigua,consultivo,open,600,0,3.0000,8.2049
+X3,compilador,contigua,consultivo,read,1719,0,1.0000,1.4828
+X3,compilador,contigua,consultivo,unlink,80,0,4.0000,13.6880
+X3,compilador,contigua,consultivo,write,726,0,1.0000,0.9068
+X3,banco_dados,contigua,consultivo,close,2,0,1.0000,4.8360
+X3,banco_dados,contigua,consultivo,create,2,0,3.0000,8.4600
+X3,banco_dados,contigua,consultivo,mkdir,1,0,3.0000,8.4600
+X3,banco_dados,contigua,consultivo,open,2,0,2.0000,4.2500
+X3,banco_dados,contigua,consultivo,read,2405,0,1.0000,5.4918
+X3,banco_dados,contigua,consultivo,seek,3000,0,0.0000,0.0000
+X3,banco_dados,contigua,consultivo,write,1190,0,1.0000,5.5425

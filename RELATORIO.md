@@ -131,15 +131,31 @@ Na prática, o Linux permite polling de conclusões com `io_uring` em dispositiv
 
 **Fundamentação:** Leituras consecutivas aproveitam a alocação contígua e evitam parte dos custos de busca e rotação do HDD. Acesso direto permite escolher a posição, mas o seek do sistema de arquivos só atualiza o handle; o custo físico aparece na leitura ou escrita seguinte. As cargas oficiais têm arquivos, tamanhos e operações diferentes (Silberschatz, 9ª ed., cap. 11; simes/disco.py e simes/arquivos/camada_bloco.py).
 
-**Configuração:** [ ]
+**Configuração:** Duas cargas oficiais, compilador e banco_dados, no HDD, com alocação contígua e sem cache. O compilador executa três builds, lendo fontes/cabeçalhos e criando objetos; o banco acessa uma tabela de 64 MiB em 3.000 transações com posições aleatórias e log de acréscimo. A hipótese foi registrada em 332de0e antes da execução de `python3 executar.py experimentos X1 X2 X3`.
 
-**Resultados:** [ ]
+**Resultados:** As duas execuções terminaram sem erros. As médias por operação são tempos de disco simulados.
 
-**Evidências:** [ ]
+| Indicador | Compilador | Banco de dados |
+|---|---:|---:|
+| Operações | 3.904 | 6.602 |
+| Acessos totais | 5.400 | 3.610 |
+| Acessos por operação | 1,3832 | 0,5468 |
+| Tempo total (ms) | 11.986,6500 | 19.846,9600 |
+| Tempo médio geral (ms) | 3,0704 | 3,0062 |
+| Tempo médio de read (ms) | 1,4828 | 5,4918 |
+| Tempo médio de write (ms) | 0,9068 | 5,5425 |
+| Acessos médios por read/write | 1 / 1 | 1 / 1 |
+| Tempo médio de open (ms) | 8,2049 | 4,2500 |
+| Acessos médios por open | 3 | 2 |
+| Operações seek / custo (ms) | 0 / não se aplica | 3.000 / 0 |
 
-**Análise:** [ ]
+**Evidências:** `resultados/arquivos.csv` e `resultados/arquivos_por_operacao.csv` (X3), `resultados/experimentos.csv` e `graficos/X3_tempo_por_operacao.png`. Os gráficos foram gerados com `python3 graficos.py`.
 
-**Veredito:** [ ]
+**Análise:** O read do compilador custou cerca de 73% menos tempo que o do banco, apesar de ambos acessarem um bloco por leitura. A diferença aparece na localidade física: no modelo, blocos consecutivos evitam rotação adicional, enquanto posições aleatórias pagam busca e rotação com maior frequência. As escritas também foram mais baratas no compilador, mas incluem padrões e tamanhos diferentes, não uma comparação controlada do mesmo arquivo. O banco fez 3.000 seeks, todos sem acesso e sem tempo de disco: só a operação seguinte efetua a transferência.
+
+A média geral do banco (3,0062 ms) ficou ligeiramente abaixo da do compilador (3,0704 ms), embora seus reads fossem mais lentos. Os seeks gratuitos são cerca de 45% de suas operações e diluem essa média. Já o compilador repete aberturas, criações, fechamentos e remoções; seus opens percorrem três diretórios, contra dois no banco. O tempo total maior do banco também depende do maior número de operações. Assim, o resultado confirma a previsão sobre leituras e seek, mas não permite atribuir toda diferença agregada somente ao método de acesso. Essa distinção segue a separação entre métodos de acesso e operações de arquivos do cap. 11 do livro. Não houve falha de alocação nem realocação nas duas cargas.
+
+**Veredito:** CONFIRMADA
 
 ### X4 — Custo de resolver caminhos conforme a profundidade
 
