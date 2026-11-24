@@ -102,6 +102,13 @@ Os experimentos de módulos não implementados aparecem como `nao_implementado` 
 6. **Cada integrante** envia o PDF do relatório no Moodle. Só o relatório é enviado; código,
    resultados e gráficos ficam no repositório.
 
+### PDF do relatório do grupo
+
+O PDF final está em `output/pdf/relatorio-simes.pdf`. Para regenerá-lo com as tabelas e
+os gráficos oficiais incorporados, instale `reportlab` (`python3 -m pip install reportlab`)
+e execute `python3 ferramentas/exportar_relatorio.py`. Atualize os CSVs e rode
+`python3 graficos.py` antes de exportar se houver alterações nos experimentos.
+
 O professor considera o repositório no estado em que estava no prazo de entrega; commits
 posteriores podem ser desconsiderados.
 

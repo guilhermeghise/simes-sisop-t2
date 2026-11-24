@@ -1,67 +1,52 @@
 # Relatório — SimES: simulador de E/S e de sistema de arquivos
 
-**Integrantes:** [nome completo de TODOS os integrantes, separados por vírgula]
+**Integrantes:** Eduardo Ferrari, Guilherme Ghise
 
-**Repositório:** [https://github.com/usuario/repositorio — o repositório público do grupo]
-
-<!--
-INSTRUÇÕES DO MODELO (apaguem este bloco antes de entregar)
-- Este relatório é a entrega: exportem-no para PDF e CADA integrante envia o PDF no Moodle.
-- Nomes completos de todos os integrantes e o link do repositório público são obrigatórios
-  (linhas acima). Não coloquem matrícula, e-mail, telefone ou outro dado pessoal.
-- Mantenham EXATAMENTE os títulos numerados (## 0. ... ## 8.) e os campos em negrito.
-- Na seção 3, mantenham X1 a X5 e só as seções dos experimentos do escopo do grupo
-  (M1 = X6, M2 = X7, M3 = X8, M4 = X9, M5 = X10, M6 = X11, integração = X12, bônus = X13).
-  Apaguem as seções dos experimentos que o grupo não fez.
-- Substituam todo texto entre colchetes [ ... ] pelo conteúdo do grupo.
-- O campo **Veredito:** aceita só: CONFIRMADA, PARCIALMENTE CONFIRMADA ou REFUTADA.
-- Em **Evidências:**, citem arquivos que existam no repositório (resultados/..., graficos/...).
-- Antes de entregar, rodem:  python3 ferramentas/validar_entrega.py
--->
+**Repositório:** https://github.com/guilhermeghise/simes-sisop-t2
 
 ## 0. Resumo
 
-[Até 10 linhas: o que o grupo implementou, quais módulos escolheu e os 3 resultados mais importantes.]
+Implementamos o núcleo N1–N4 e o módulo M3 do SimES, com SSTF, SCAN, polling, interrupção, operações de arquivos, DMA e buffering. Executamos X1–X5 e X8 com as cargas e os parâmetros oficiais. Em X1, SSTF reduziu a resposta média da carga aleatória em cerca de 58% frente a FCFS, mas SCAN não teve a menor espera máxima nessa carga. Em X4, cada diretório adicional acrescentou uma leitura ao open. Em X8, DMA teve custo fixo por requisição, e o buffering duplo atingiu o mesmo tempo total do circular nas taxas constantes avaliadas. Os testes do escopo e a validação automática passaram.
 
 ## 1. Escopo realizado
 
 | Parte | Situação | Observação |
 |---|---|---|
-| N1 · Dispositivo (fornecido) | usado | — |
-| N2 · Subsistema de E/S (SSTF, SCAN, polling, interrupção) | [completo / parcial] | [ ] |
-| N3 · Sistema de arquivos | [completo / parcial] | [ ] |
-| N4 · Experimentos X1–X5 e relatório | [completo / parcial] | [ ] |
-| [M? · nome do módulo] | [completo / parcial] | [ ] |
-| [Integração (grupos de 4)] | [completo / parcial] | [ ] |
-| [Bônus flash] | [completo / parcial / não feito] | [ ] |
+| N1 · Dispositivo (fornecido) | usado | HDD e dispositivo rápido, parâmetros oficiais |
+| N2 · Subsistema de E/S (SSTF, SCAN, polling, interrupção) | completo | Desempate pela ordem da fila; SCAN visita a borda |
+| N3 · Sistema de arquivos | completo | Caminhos, criação, tabelas, acesso, fechamento e remoção |
+| N4 · Experimentos X1–X5 e relatório | completo | Hipóteses registradas antes das respectivas execuções |
+| M3 · DMA e buffering | completo | DMA; buffers simples, duplo e circular; X8 |
+| Integração (grupos de 4) | não se aplica | Dupla; integração desativada |
+| Bônus flash | não feito | Fora do escopo |
 
-Resultado dos testes automáticos (`python3 executar.py testes`): [cole a última linha, ex.: "Ran 26 tests ... OK (skipped=6)"]
+Resultado dos testes automáticos (`python3 executar.py testes`): `Ran 43 tests — OK (skipped=8)`. São 35 testes aprovados e oito pulados, todos de módulos ou integração fora do escopo.
 
 ## 2. Implementação
 
 ### N2 — Subsistema de E/S
 
-**Onde:** [arquivos e funções]
+**Onde:** `simes/es/escalonadores.py`, classes `SSTF` e `SCAN`; `simes/es/cpu.py`, função `custo_cpu`.
 
-**Decisões:** [como implementaram SSTF, SCAN, polling e interrupção; casos especiais]
+**Decisões:** SSTF seleciona a menor distância e preserva a ordem de chegada nos empates. SCAN inclui pedidos no mesmo cilindro como à frente e visita a borda antes de inverter. Polling custa toda a duração do atendimento; interrupção custa 0,017 ms por bloco. Mantivemos FCFS e o simulador de eventos fornecidos.
 
-**Dificuldades:** [o que deu trabalho e como resolveram]
+**Dificuldades:** A ida do SCAN até a borda precisa entrar no custo, mesmo sem pedido ali; os testes com a fila do livro conferem o deslocamento. CPU e duração do dispositivo são indicadores separados no modelo.
 
 ### N3 — Sistema de arquivos
 
-**Onde:** [arquivos e funções]
+**Onde:** `simes/arquivos/sistema.py`, métodos `resolver`, `mkdir`, `create`, `open`, `read`, `write`, `seek`, `close` e `unlink`.
 
-**Decisões:** [resolução de caminhos, tabelas de arquivos abertos, leitura e escrita, unlink com arquivo aberto]
+**Decisões:** Cada diretório visitado custa uma leitura. Os handles guardam modo e posição por abertura; a tabela global tem uma entrada por FCB e soma as aberturas. A leitura para no EOF, e seek além do EOF não aloca blocos. A escrita estende a alocação e aplica os acessos extras de realocação antes dos blocos escritos. Append consulta o tamanho atual a cada escrita. Escritas vazias não alteram metadados. O close grava o pai quando o FCB está sujo, limpa a marca e decrementa a contagem. O unlink remove o nome imediatamente, mas um arquivo aberto conserva seus blocos até o último close. Foram mantidos os ganchos de permissão e trava previstos no esqueleto.
 
-**Dificuldades:** [ ]
+**Dificuldades:** A posição pode estar além do EOF sem justificar leitura ou alocação. Outra abertura pode aumentar o arquivo antes de um append. Há testes adicionais para esses casos, custos de realocação, ENOSPC, modos inválidos e remoção com múltiplas aberturas. Nenhum conteúdo de bytes é armazenado: as operações simulam quantidades, metadados e acessos.
 
-### [M? — nome do módulo]
+### M3 — DMA e buffering
 
-**Onde:** [ ]
+**Onde:** `simes/es/cpu.py`, função `custo_cpu`; `simes/es/buffering.py`, função `simular_buffering`.
 
-**Decisões:** [ ]
+**Decisões:** DMA cobra as constantes de programação e de uma interrupção final, somando 0,018 ms por requisição. No buffering, um vetor circular registra quando cada buffer fica livre. O produtor aguarda o término de sua produção anterior e a liberação do buffer; o dispositivo aguarda os dados prontos e sua gravação anterior. O buffer fica ocupado até o fim da gravação. Retornamos duração, espera do produtor e utilização do dispositivo; carga vazia retorna zeros.
 
-**Dificuldades:** [ ]
+**Dificuldades:** Liberar um buffer no início da gravação permitiria sobreposição indevida. Os testes verificam bloqueio com consumidor lento, produtor lento, taxas iguais, zero blocos e tempos nulos. Dois buffers já sobrepõem produção e consumo no cenário determinístico, portanto o terceiro pode reduzir bloqueio sem reduzir o tempo total.
 
 ## 3. Experimentos
 
@@ -215,38 +200,6 @@ Os quatro indicadores são máximos coletados ao longo da carga e não precisam 
 
 **Veredito:** CONFIRMADA
 
-### X6 — Cache de blocos (M1)
-
-**Hipótese:** [ ]
-
-**Fundamentação:** [ ]
-
-**Configuração:** [ ]
-
-**Resultados:** [ ]
-
-**Evidências:** [ ]
-
-**Análise:** [ ]
-
-**Veredito:** [ ]
-
-### X7 — Escalonadores avançados e inanição (M2)
-
-**Hipótese:** [ ]
-
-**Fundamentação:** [ ]
-
-**Configuração:** [ ]
-
-**Resultados:** [ ]
-
-**Evidências:** [ ]
-
-**Análise:** [ ]
-
-**Veredito:** [ ]
-
 ### X8 — DMA e buffering (M3)
 
 **Hipótese:** Esperamos que DMA use 0,018 ms de CPU por requisição, independente dos blocos. A interrupção deve custar menos para um bloco (0,017 ms), mas mais para 8, 64 e 256 blocos. No buffering, esperamos que dois e três buffers reduzam o tempo total frente a um buffer e empatem entre si nas taxas constantes escolhidas; o terceiro pode reduzir a espera do produtor quando o dispositivo é mais lento.
@@ -286,112 +239,52 @@ Com um buffer, o tempo é 500 × (2 + consumo), pois gerar e gravar não se sobr
 
 **Veredito:** CONFIRMADA
 
-### X9 — Links e compartilhamento (M4)
-
-**Hipótese:** [ ]
-
-**Fundamentação:** [ ]
-
-**Configuração:** [ ]
-
-**Resultados:** [ ]
-
-**Evidências:** [ ]
-
-**Análise:** [ ]
-
-**Veredito:** [ ]
-
-### X10 — Proteção e travas (M5)
-
-**Hipótese:** [ ]
-
-**Fundamentação:** [ ]
-
-**Configuração:** [ ]
-
-**Resultados:** [ ]
-
-**Evidências:** [ ]
-
-**Análise:** [ ]
-
-**Veredito:** [ ]
-
-### X11 — Métodos de alocação (M6)
-
-**Hipótese:** [ ]
-
-**Fundamentação:** [ ]
-
-**Configuração:** [ ]
-
-**Resultados:** [ ]
-
-**Evidências:** [ ]
-
-**Análise:** [ ]
-
-**Veredito:** [ ]
-
-### X12 — Integração ponta a ponta
-
-**Hipótese:** [ ]
-
-**Fundamentação:** [ ]
-
-**Configuração:** [ ]
-
-**Resultados:** [ ]
-
-**Evidências:** [ ]
-
-**Análise:** [ ]
-
-**Veredito:** [ ]
-
-### X13 — Armazenamento flash (bônus)
-
-**Hipótese:** [ ]
-
-**Fundamentação:** [ ]
-
-**Configuração:** [ ]
-
-**Resultados:** [ ]
-
-**Evidências:** [ ]
-
-**Análise:** [ ]
-
-**Veredito:** [ ]
-
 ## 4. Relação com sistemas reais
 
-[Para cada tema do escopo, relacionem o que o simulador mostrou com o que Windows, Linux e
-macOS fazem de fato. Exemplos: escalonadores de E/S do Linux (mq-deadline, BFQ, none); cache
-de páginas e gravação periódica; cache de diretórios (dentry cache); FAT/exFAT nos pendrives;
-estruturas do ext4, do NTFS e do APFS; travas mandatórias do Windows × consultivas do Linux.]
+**Escalonamento e conclusão de E/S.** O X1 isola uma fila de um HDD. O Linux usa a infraestrutura [blk-mq](https://docs.kernel.org/block/blk-mq.html), com filas de software e de hardware; isso limita a transposição das médias do simulador para máquinas atuais. No Windows, o [Storport](https://learn.microsoft.com/en-us/windows-hardware/drivers/storage/storport-i-o-model) trabalha com pedidos assíncronos. O macOS oferece interfaces de drivers de blocos no [BlockStorageDeviceDriverKit](https://developer.apple.com/documentation/blockstoragedevicedriverkit). As interfaces reais não equivalem diretamente aos três algoritmos didáticos. X2 mostra como o custo relativo de polling e interrupção muda com a velocidade do dispositivo; seus valores fixos não modelam todas as estratégias reais.
+
+**Arquivos, caminhos e aberturas.** X3 evidencia localidade e custos de metadados; X4 cobra uma leitura por diretório em todas as aberturas. O Linux mantém a [dcache](https://docs.kernel.org/filesystems/path-lookup.html), permitindo resolver componentes já conhecidos sem repetir todo o acesso ao armazenamento. Portanto, a reta observada no X4 não prevê uma leitura física por componente em todo open real. X5 distingue arquivos distintos de aberturas: vários handles podem referenciar o mesmo arquivo. No Linux, referências permitem continuar usando um arquivo removido; no macOS, o manual de [unlink](https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/unlink.2.html) também descreve a liberação após o fechamento das últimas referências. No Windows, a [exclusão e o fechamento](https://learn.microsoft.com/en-us/windows/win32/fileio/closing-and-deleting-files) dependem dos handles e das regras de compartilhamento. O comportamento do simulador aproxima a remoção Unix; ele não reproduz toda a semântica de compartilhamento do Windows.
+
+**DMA e buffers.** O Linux usa sua [API de DMA](https://docs.kernel.org/core-api/dma-api-howto.html) para mapear memória acessível ao dispositivo. O Windows oferece [técnicas de programação DMA](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/dma-programming-techniques), e o macOS fornece [IODMACommand](https://developer.apple.com/documentation/kernel/iodmacommand) para converter referências de memória em endereços de E/S. Essas interfaces exigem gerenciamento que não aparece no custo fixo de X8. Buffers permitem sobreposição, mas não aumentam a taxa do estágio mais lento. O buffering do experimento é uma fila finita entre produtor e dispositivo, diferente da cache de arquivos; o [buffering de arquivos do Windows](https://learn.microsoft.com/windows/win32/fileio/file-buffering) tem regras próprias para operações com e sem cache.
 
 ## 5. Limitações do simulador
 
-[O que o modelo simplifica e como isso pode ter afetado as conclusões.]
+- Os tempos são simulados por fórmulas fixas; não são medições de desempenho deste computador. As sementes são fixas e não foram calculados intervalos de confiança para uma população de cargas.
+- O HDD não representa todos os detalhes de firmware, paralelismo, reordenação interna, setores ou falhas. O dispositivo rápido é apenas o modelo sem busca e rotação, não um SSD completo.
+- O sistema de arquivos usa diretórios de um bloco, FCBs em memória e alocação contígua. Não implementamos ext4, NTFS ou APFS, journaling, recuperação após queda, cache de dados ou de caminhos.
+- A camada de arquivos agrupa blocos consecutivos e soma tempos de disco sem fila de E/S. Não habilitamos a integração X12: os tempos de X3–X5 não incluem os escalonadores de X1.
+- X3 compara cargas com tamanhos, operações e frequências diferentes. Seek não acessa disco no modelo, e sua presença afeta a média agregada. Assim, a diferença entre cargas não é um efeito isolado do método de acesso.
+- A contagem global de X5 é por FCB; a posição é independente por abertura. Não simulamos duplicação de descritores, fork, limites do kernel ou concorrência real.
+- DMA só altera a contabilidade de CPU. Não há contenção de barramento, IOMMU, custo de mapeamento, coerência de cache ou agrupamento de interrupções. CPU não é somada ao tempo do disco.
+- O buffering usa blocos idênticos e tempos constantes, sem jitter, cópia adicional ou processamento paralelo dentro de um estágio. A igualdade entre dois e três buffers vale para essa configuração e não elimina o valor de buffers extras em cargas variáveis.
 
 ## 6. Conclusões
 
-[3 a 6 conclusões objetivas.]
+1. SSTF reduziu deslocamento e resposta média frente a FCFS na carga aleatória de X1. A menor espera máxima do SCAN prevista nessa carga não se confirmou.
+2. No modelo de X2, interrupções reduzem CPU no HDD, mas o polling custa menos no dispositivo rápido com os parâmetros fornecidos.
+3. A localidade das leituras influencia o custo de X3, e a composição da carga impede interpretar a média geral como uma comparação controlada entre métodos de acesso.
+4. Resolver mais diretórios aumenta os acessos do open em X4; separar tabelas globais e por processo evita confundir arquivos distintos com suas aberturas em X5.
+5. DMA amortiza a programação por requisição, sendo vantajoso frente à interrupção por bloco a partir dos tamanhos maiores avaliados. Com um bloco, 0,018 ms de DMA supera ligeiramente 0,017 ms de interrupção.
+6. Dois buffers permitem a sobreposição necessária nas taxas constantes de X8. O terceiro não reduz a duração total observada, embora possa diminuir o bloqueio do produtor.
 
 ## 7. Referências
 
-- SILBERSCHATZ, A.; GALVIN, P. B.; GAGNE, G. *Operating System Concepts*. 9. ed. Wiley, 2013.
-- [Outras fontes consultadas, com link]
+- SILBERSCHATZ, A.; GALVIN, P. B.; GAGNE, G. *Operating System Concepts*. 9. ed. Wiley, 2013. Capítulos 10–13, conforme as referências e regras do esqueleto.
+- NOVO MÓR, Filipo. [Esqueleto e README do SimES, 2026/II](https://github.com/ProfessorFilipo/Aulas_SisOp/tree/main/Trabalho_IO_2026II). Regras de custos, parâmetros e configurações oficiais.
+- LINUX KERNEL. [Multi-Queue Block IO Queueing Mechanism](https://docs.kernel.org/block/blk-mq.html); [Pathname lookup](https://docs.kernel.org/filesystems/path-lookup.html); [Dynamic DMA mapping Guide](https://docs.kernel.org/core-api/dma-api-howto.html).
+- MICROSOFT. [Storport I/O model](https://learn.microsoft.com/en-us/windows-hardware/drivers/storage/storport-i-o-model); [Closing and Deleting Files](https://learn.microsoft.com/en-us/windows/win32/fileio/closing-and-deleting-files); [DMA programming techniques](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/dma-programming-techniques); [File Buffering](https://learn.microsoft.com/windows/win32/fileio/file-buffering).
+- APPLE. [BlockStorageDeviceDriverKit](https://developer.apple.com/documentation/blockstoragedevicedriverkit); [unlink(2), manual arquivado do macOS](https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/unlink.2.html); [IODMACommand](https://developer.apple.com/documentation/kernel/iodmacommand).
+
+Documentação on-line consultada em 24/11/2026. As interpretações foram limitadas às interfaces documentadas, sem medições em sistemas operacionais reais.
 
 ## 8. Declaração de autoria e uso de IA
 
-**Quem fez o quê:** [divisão do trabalho entre os integrantes]
+**Quem fez o quê:** Conforme o histórico do repositório e o contexto de divisão do trabalho, Guilherme Ghise implementou SSTF, SCAN, polling, interrupção, resolução de caminhos, criação de diretórios/arquivos e abertura; também registrou hipóteses, executou e analisou X1 e X2. Eduardo Ferrari ficou responsável pelo acesso, fechamento e remoção de arquivos, DMA, buffering, testes adicionais, X3–X5 e X8, dados do grupo, consolidação do relatório e exportação em PDF. As tarefas desta segunda etapa foram executadas com assistência de IA, sob solicitação de Eduardo. O disco, FCFS, alocador contíguo, simuladores, cargas, configurações e ferramentas de validação foram fornecidos pelo professor. Não atribuímos aos integrantes autoria desses componentes.
 
 **Uso de ferramentas de IA:**
 
 | Ferramenta | Finalidade | Onde foi usada (arquivos ou seções) |
 |---|---|---|
-| [ex.: nenhuma] | [ ] | [ ] |
+| Assistente de IA da OpenAI, nesta etapa | Implementação, testes, execução dos experimentos, análise, redação e exportação | `simes/arquivos/sistema.py` (read, write, seek, close, unlink), `simes/es/cpu.py` (DMA), `simes/es/buffering.py`, testes adicionais, `graficos.py` (rótulos de X5), `grupo.json`, hipóteses/análises de X3–X5 e X8, demais seções consolidadas de `RELATORIO.md`, `ferramentas/exportar_relatorio.py` e PDF |
+
+X1 e X2 e a implementação anterior foram preservados do histórico. Não há informação confirmada nesta etapa sobre eventuais ferramentas de IA usadas anteriormente. As hipóteses foram registradas antes de executar cada experimento correspondente. A revisão pessoal e o envio individual do relatório no Moodle cabem aos integrantes.
