@@ -134,8 +134,8 @@ class SistemaArquivos:
 
     @staticmethod
     def _dividir(caminho):
-        if not caminho.startswith("/"):
-            raise ErroSA("EINVAL", "o caminho deve ser absoluto: %s" % caminho)
+        if not isinstance(caminho, str) or not caminho.startswith("/"):
+            raise ErroSA("EINVAL", "o caminho deve ser absoluto: %s" % (caminho,))
         return [p for p in caminho.split("/") if p]
 
     def _entrada(self, processo, handle):
