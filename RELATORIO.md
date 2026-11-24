@@ -253,15 +253,38 @@ Os quatro indicadores são máximos coletados ao longo da carga e não precisam 
 
 **Fundamentação:** DMA cobra uma programação de 0,003 ms e uma interrupção de 0,015 ms. Interrupção programada cobra 0,017 ms por bloco. Com um buffer, produção e gravação são serializadas; com dois, esses estágios podem se sobrepor, mas o gargalo continua sendo o estágio mais lento. O terceiro buffer amplia a fila sem aumentar essa taxa em um fluxo determinístico de blocos idênticos (Silberschatz, 9ª ed., §§13.2.3 e 13.4.2; simes/parametros.py).
 
-**Configuração:** [ ]
+**Configuração:** Hipótese registrada em 4e46129 antes de `python3 executar.py experimentos X1 X2 X3 X4 X5 X8`. Na parte de CPU: HDD, FCFS, sem cache, 1.000 requisições aleatórias por execução, semente 11, intervalo médio de 40 ms, requisições de 1, 8, 64 ou 256 blocos, nos modos polling, interrupção e DMA (12 execuções). No buffering: 500 blocos, produção de 2 ms/bloco, consumo de 0,5, 2 ou 8 ms/bloco, com 1, 2 ou 3 buffers (nove execuções).
 
-**Resultados:** [ ]
+**Resultados:** Todas as 21 execuções terminaram com status ok. Os percentuais de CPU abaixo usam o tempo total de cada execução como denominador.
 
-**Evidências:** [ ]
+| Blocos por requisição | Polling (%) | Interrupção (%) | DMA (%) | CPU de interrupção por req. (ms) | CPU DMA por req. (ms) |
+|---|---:|---:|---:|---:|---:|
+| 1 | 25,1715 | 0,0423 | 0,0448 | 0,017 | 0,018 |
+| 8 | 25,8677 | 0,3383 | 0,0448 | 0,136 | 0,018 |
+| 64 | 31,4371 | 2,7059 | 0,0448 | 1,088 | 0,018 |
+| 256 | 50,5224 | 10,8204 | 0,0448 | 4,352 | 0,018 |
 
-**Análise:** [ ]
+Os custos por requisição são os das constantes do modelo; os percentuais dos CSVs foram arredondados a quatro casas.
 
-**Veredito:** [ ]
+| Consumo (ms/bloco) | Buffers | Tempo total (ms) | Bloqueio do produtor (ms) | Utilização do dispositivo (%) |
+|---|---|---:|---:|---:|
+| 0,5 | 1 | 1.250,0 | 249,5 | 20,0000 |
+| 0,5 | 2 | 1.000,5 | 0,0 | 24,9875 |
+| 0,5 | 3 | 1.000,5 | 0,0 | 24,9875 |
+| 2 | 1 | 2.000,0 | 998,0 | 50,0000 |
+| 2 | 2 | 1.002,0 | 0,0 | 99,8004 |
+| 2 | 3 | 1.002,0 | 0,0 | 99,8004 |
+| 8 | 1 | 5.000,0 | 3.992,0 | 80,0000 |
+| 8 | 2 | 4.002,0 | 2.988,0 | 99,9500 |
+| 8 | 3 | 4.002,0 | 2.980,0 | 99,9500 |
+
+**Evidências:** `resultados/es.csv` (X8), `resultados/buffering.csv`, `resultados/experimentos.csv`, `graficos/X8_cpu.png` e `graficos/X8_buffering.png`, gerados com `python3 graficos.py`.
+
+**Análise:** DMA custa 0,003 + 0,015 = 0,018 ms por requisição, enquanto interrupção cobra 0,017 ms por bloco. Para um bloco, DMA custa cerca de 5,9% mais CPU que interrupção. Para 8, 64 e 256 blocos, a redução de CPU por requisição é de aproximadamente 86,8%, 98,3% e 99,6%. A vantagem decorre de amortizar a programação e a interrupção final sobre toda a transferência, conforme §13.2.3 do livro. O polling cresce com o tempo de atendimento do HDD. Para um mesmo tamanho de requisição, os três modos mantêm o mesmo tempo total: o simulador contabiliza CPU separadamente do dispositivo, e não demonstra uma aceleração da transferência por DMA.
+
+Com um buffer, o tempo é 500 × (2 + consumo), pois gerar e gravar não se sobrepõem. Com dois ou três buffers, o tempo é 2 + consumo + 499 × max(2, consumo): há enchimento inicial e esvaziamento final, mas o regime permanente segue o estágio mais lento. Para consumo de 0,5 ms, o produtor limita a utilização do dispositivo a cerca de 25%; para 2 e 8 ms, a utilização chega perto de 100%. O terceiro buffer reduziu o bloqueio em apenas 8 ms no consumidor lento, de 2.988 para 2.980 ms, sem mudar os 4.002 ms totais. Isso confirma a distinção entre capacidade de fila e vazão: mais buffers não aceleram o gargalo. A igualdade entre duplo e circular vale para estes tempos constantes; não foi avaliada variabilidade de produção ou consumo (§13.4.2).
+
+**Veredito:** CONFIRMADA
 
 ### X9 — Links e compartilhamento (M4)
 
