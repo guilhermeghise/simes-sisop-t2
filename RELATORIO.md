@@ -159,9 +159,9 @@ A média geral do banco (3,0062 ms) ficou ligeiramente abaixo da do compilador (
 
 ### X4 — Custo de resolver caminhos conforme a profundidade
 
-**Hipótese:** [ ]
+**Hipótese:** Esperamos que open em um caminho com d diretórios abaixo da raiz faça exatamente d + 1 leituras de diretório, para d de 1 a 10. O tempo médio deve crescer com a profundidade nas cargas oficiais, sem custo de escrita no open.
 
-**Fundamentação:** [ ]
+**Fundamentação:** O modelo não tem cache de diretórios: resolver lê a raiz e cada diretório intermediário até localizar o arquivo. Cada diretório ocupa um bloco. Assim, acrescentar um componente de diretório acrescenta uma leitura, embora o tempo por leitura dependa da posição física e da continuidade no HDD (Silberschatz, 9ª ed., cap. 11; regras de simes/arquivos/sistema.py).
 
 **Configuração:** [ ]
 
