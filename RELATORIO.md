@@ -190,9 +190,9 @@ A linearidade dos acessos decorre da regra de resolução de caminhos do modelo,
 
 ### X5 — Tabelas de arquivos abertos com vários processos
 
-**Hipótese:** [ ]
+**Hipótese:** Na carga de servidor web, esperamos um máximo de três handles por processo e 24 entradas somadas nos oito trabalhadores. A tabela global deve ter menos entradas que essa soma, no máximo 12 arquivos distintos, e algum arquivo deve apresentar contador de aberturas maior que um.
 
-**Fundamentação:** [ ]
+**Fundamentação:** Cada trabalhador abre três páginas antes das leituras e fechamentos. As páginas vêm de um conjunto de 12 arquivos, permitindo compartilhar FCBs entre processos. A tabela global representa arquivos distintos e soma suas aberturas, enquanto cada abertura tem modo e posição na tabela do processo (Silberschatz, 9ª ed., cap. 11; simes/cargas_arquivos.py e simes/arquivos/estruturas.py).
 
 **Configuração:** [ ]
 
