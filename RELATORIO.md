@@ -249,9 +249,9 @@ Os quatro indicadores são máximos coletados ao longo da carga e não precisam 
 
 ### X8 — DMA e buffering (M3)
 
-**Hipótese:** [ ]
+**Hipótese:** Esperamos que DMA use 0,018 ms de CPU por requisição, independente dos blocos. A interrupção deve custar menos para um bloco (0,017 ms), mas mais para 8, 64 e 256 blocos. No buffering, esperamos que dois e três buffers reduzam o tempo total frente a um buffer e empatem entre si nas taxas constantes escolhidas; o terceiro pode reduzir a espera do produtor quando o dispositivo é mais lento.
 
-**Fundamentação:** [ ]
+**Fundamentação:** DMA cobra uma programação de 0,003 ms e uma interrupção de 0,015 ms. Interrupção programada cobra 0,017 ms por bloco. Com um buffer, produção e gravação são serializadas; com dois, esses estágios podem se sobrepor, mas o gargalo continua sendo o estágio mais lento. O terceiro buffer amplia a fila sem aumentar essa taxa em um fluxo determinístico de blocos idênticos (Silberschatz, 9ª ed., §§13.2.3 e 13.4.2; simes/parametros.py).
 
 **Configuração:** [ ]
 
