@@ -127,9 +127,9 @@ Na prática, o Linux permite polling de conclusões com `io_uring` em dispositiv
 
 ### X3 — Acesso sequencial × direto
 
-**Hipótese:** [ ]
+**Hipótese:** Esperamos que o tempo médio de read seja menor na carga de compilador, com leituras sequenciais, do que no banco de dados, com posições aleatórias. Esperamos também que seek não gere acessos ao disco. A média de todas as operações depende da composição de cada carga e não deve ser tomada como uma comparação isolada dos métodos de acesso.
 
-**Fundamentação:** [ ]
+**Fundamentação:** Leituras consecutivas aproveitam a alocação contígua e evitam parte dos custos de busca e rotação do HDD. Acesso direto permite escolher a posição, mas o seek do sistema de arquivos só atualiza o handle; o custo físico aparece na leitura ou escrita seguinte. As cargas oficiais têm arquivos, tamanhos e operações diferentes (Silberschatz, 9ª ed., cap. 11; simes/disco.py e simes/arquivos/camada_bloco.py).
 
 **Configuração:** [ ]
 
