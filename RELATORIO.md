@@ -281,7 +281,7 @@ Documentação on-line consultada em 24/11/2026. As interpretações foram limit
 
 **Quem fez o quê:** Guilherme Ghise ficou responsável por SSTF, SCAN, polling, interrupção, resolução de caminhos, criação e abertura de arquivos e pelos experimentos X1 e X2. Eduardo Ferrari ficou responsável pelas demais operações de arquivos, por DMA e buffering, pelos testes adicionais, pelos experimentos X3, X4, X5 e X8 e pela consolidação do relatório. O professor forneceu o esqueleto, as cargas, as configurações dos experimentos e o validador.
 
-**Uso de ferramentas de IA:** Discutimos os requisitos do simulador, pesquisamos os conceitos de sistemas operacionais e dividimos as tarefas entre os integrantes. Como tínhamos pouca familiaridade com Python, usamos o OpenAI Codex na implementação das soluções em código. A ferramenta também auxiliou nos testes, na execução dos experimentos e na redação das análises. A tabela abaixo detalha o uso em cada etapa.
+**Uso de ferramentas de IA:** Nós discutimos os requisitos do simulador, pesquisamos os conceitos de sistemas operacionais e definimos a divisão das tarefas. Usamos o OpenAI Codex em etapas do desenvolvimento. Na implementação, a ferramenta ajudou a traduzir as regras do simulador em código Python, linguagem com a qual tínhamos pouca familiaridade. Também recorremos a ela nos testes, na execução dos experimentos e na redação das análises. A tabela detalha os usos na parte de cada integrante.
 
 | Ferramenta | Finalidade | Onde foi usada (arquivos ou seções) |
 |---|---|---|
